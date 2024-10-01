@@ -1,6 +1,6 @@
 # AWS_Cloud_Solution_For_2_Company_Websites_Using_A_Reverse_Proxy_Technology
 To reconstruct the AWS Cloud Solution for two company websites using reverse proxy technology (NGINX), follow these detailed steps:
-Sure! Let's expand on each section in greater detail, explaining each command, its purpose, and the reasoning behind the steps.
+<img width="673" alt="architecture" src="https://github.com/user-attachments/assets/1c23492a-f86f-493a-826b-044ccab297ed">
 
 ---
 
@@ -16,6 +16,8 @@ Sure! Let's expand on each section in greater detail, explaining each command, i
    - Click on **Create an account** and follow the prompts.
    - Name the new account **DevOps**.
    - Provide a unique email address that isn’t used for another AWS account (you can create a new email or use aliases like `yourname+aws@yourdomain.com`).
+![image](https://github.com/user-attachments/assets/f963a964-e8dc-47a5-b434-f7f50239260a)
+ ![image](https://github.com/user-attachments/assets/837bcd3c-ee15-4194-9a6f-daa9b4be729a)
 
 This sub-account will help you segregate DevOps tasks from your root account, providing isolation and better security practices.
 
@@ -43,8 +45,9 @@ This will point your domain’s DNS to Route 53, allowing AWS to handle DNS for 
 ### 2.1. **Create a VPC**
 
 A **Virtual Private Cloud (VPC)** is an isolated network in AWS where your resources (such as EC2 instances, databases, etc.) will reside. Each VPC is divided into **subnets** (smaller ranges of IPs) that can be public or private.
+![image](https://github.com/user-attachments/assets/7135c111-9b74-4d29-b81e-2c9b0241c3ca)
 
-```bash
+```
 aws ec2 create-vpc --cidr-block 10.0.0.0/16
 ```
 
@@ -55,8 +58,9 @@ After running this command, you will get an output with the `VPC_ID`. Copy it, a
 ### 2.2. **Enable DNS Hostnames for the VPC**
 
 By default, DNS hostnames are not enabled for a VPC. You need this to ensure EC2 instances can be resolved by DNS names.
+![image](https://github.com/user-attachments/assets/ae25aced-31c8-4100-8cdc-ee98cf099e53)
 
-```bash
+```
 aws ec2 modify-vpc-attribute --vpc-id <VPC_ID> --enable-dns-hostnames
 ```
 
@@ -70,7 +74,7 @@ A **subnet** is a segment of the VPC's IP address range where you can launch AWS
 
 #### Create Public Subnets:
 
-```bash
+```
 aws ec2 create-subnet --vpc-id <VPC_ID> --cidr-block 10.0.1.0/24 --availability-zone us-east-1a
 aws ec2 create-subnet --vpc-id <VPC_ID> --cidr-block 10.0.2.0/24 --availability-zone us-east-1b
 ```
@@ -83,10 +87,12 @@ aws ec2 create-subnet --vpc-id <VPC_ID> --cidr-block 10.0.2.0/24 --availability-
 
 Repeat the above command with different CIDR blocks for private subnets:
 
-```bash
+```
 aws ec2 create-subnet --vpc-id <VPC_ID> --cidr-block 10.0.3.0/24 --availability-zone us-east-1a
 aws ec2 create-subnet --vpc-id <VPC_ID> --cidr-block 10.0.4.0/24 --availability-zone us-east-1b
 ```
+![image](https://github.com/user-attachments/assets/987cc5df-f844-4100-bec7-a83e54b21e76)
+
 
 Now you have two public subnets and two private subnets in different availability zones.
 
@@ -96,7 +102,7 @@ A **Route Table** contains rules that determine how network traffic is routed wi
 
 #### Create a Public Route Table:
 
-```bash
+```
 aws ec2 create-route-table --vpc-id <VPC_ID>
 ```
 
@@ -104,12 +110,14 @@ aws ec2 create-route-table --vpc-id <VPC_ID>
 
 #### Associate Public Subnets with the Public Route Table:
 
-```bash
+```
 aws ec2 associate-route-table --route-table-id <PUBLIC_ROUTE_TABLE_ID> --subnet-id <SUBNET_ID>
 ```
 
 - `--route-table-id <PUBLIC_ROUTE_TABLE_ID>`: Use the Route Table ID from the previous command.
 - `--subnet-id <SUBNET_ID>`: Specify the Subnet ID for your public subnets (run this command for each public subnet).
+![image](https://github.com/user-attachments/assets/01ecfbf8-fe5d-4c52-8d78-3e87fb87d3f7)
+
 
 This command associates the public subnets with the public route table.
 
@@ -119,7 +127,7 @@ An **Internet Gateway** is a VPC component that allows communication between ins
 
 #### Create an IGW:
 
-```bash
+```
 aws ec2 create-internet-gateway
 ```
 
@@ -127,9 +135,11 @@ aws ec2 create-internet-gateway
 
 #### Attach the IGW to the VPC:
 
-```bash
+```
 aws ec2 attach-internet-gateway --vpc-id <VPC_ID> --internet-gateway-id <IGW_ID>
 ```
+![image](https://github.com/user-attachments/assets/9d408225-7a5d-405f-a2d9-7f7da66e2872)
+
 
 Now, your VPC is connected to the internet through this IGW.
 
@@ -137,12 +147,13 @@ Now, your VPC is connected to the internet through this IGW.
 
 To allow traffic to flow from the internet to your public subnets, you need to create a route in the public route table.
 
-```bash
+```
 aws ec2 create-route --route-table-id <PUBLIC_ROUTE_TABLE_ID> --destination-cidr-block 0.0.0.0/0 --gateway-id <IGW_ID>
 ```
 
 - `--destination-cidr-block 0.0.0.0/0`: This route allows traffic to flow to any destination (essentially, the internet).
 - `--gateway-id <IGW_ID>`: Specifies the Internet Gateway as the path for this traffic.
+![image](https://github.com/user-attachments/assets/7648fb8d-a2f4-48f5-bbaa-a34b7c56d8ad)
 
 Now, your public subnets can send and receive traffic from the internet.
 
@@ -151,16 +162,19 @@ Now, your public subnets can send and receive traffic from the internet.
 A **NAT Gateway** is used to allow instances in private subnets to access the internet while preventing the internet from initiating connections to them.
 
 #### Allocate an Elastic IP Address:
+![image](https://github.com/user-attachments/assets/e5c9ad50-a3c6-4b5e-bc9b-9e4ad3caaad3)
 
-```bash
+```
 aws ec2 allocate-address
 ```
+
 
 - This command will give you an **Elastic IP Address (EIP)** that you can assign to the NAT Gateway.
 
 #### Create the NAT Gateway:
+![image](https://github.com/user-attachments/assets/b65c859a-d8ec-4262-8b0e-1d1975130b9e)
 
-```bash
+```
 aws ec2 create-nat-gateway --subnet-id <PUBLIC_SUBNET_ID> --allocation-id <ELASTIC_IP_ID>
 ```
 
@@ -179,7 +193,7 @@ Now, you have a NAT Gateway that will allow instances in private subnets to acce
 
 #### Create a Security Group for NGINX:
 
-```bash
+```
 aws ec2 create-security-group --group-name nginx-sg --description "Allow ALB" --vpc-id <VPC_ID>
 ```
 
@@ -187,7 +201,7 @@ This security group allows traffic from the Application Load Balancer (ALB) to t
 
 #### Create a Security Group for Web Servers:
 
-```bash
+```
 aws ec2 create-security-group --group-name web-sg --description "Allow internal ALB" --vpc-id <VPC_ID>
 ```
 
@@ -195,9 +209,10 @@ This will allow traffic from the internal load balancer to reach your web server
 
 #### Create a Security Group for the Data Layer:
 
-```bash
+```
 aws ec2 create-security-group --group-name data-sg --description "Allow access to RDS and EFS" --vpc-id <VPC_ID>
 ```
+![image](https://github.com/user-attachments/assets/ba54ab0c-d466-4994-8e15-7afcbbfdde28)
 
 This group allows access to resources such as RDS (Relational Database Service) and EFS (Elastic File System).
 
@@ -207,7 +222,7 @@ For each security group, you need to define specific inbound
 
  rules:
 
-```bash
+```
 aws ec2 authorize-security-group-ingress --group-id <SG_ID> --protocol tcp --port 80 --cidr 0.0.0.0/0
 aws ec2 authorize-security-group-ingress --group-id <SG_ID> --protocol tcp --port 443 --cidr 0.0.0.0/0
 ```
@@ -224,7 +239,7 @@ aws ec2 authorize-security-group-ingress --group-id <SG_ID> --protocol tcp --por
 
 A wildcard certificate covers all subdomains under your domain (e.g., `*.yourdomain.com` will cover `www.yourdomain.com`, `blog.yourdomain.com`, etc.).
 
-```bash
+```
 aws acm request-certificate --domain-name "*.yourdomain.com" --validation-method DNS
 ```
 
@@ -246,7 +261,7 @@ Amazon **EFS** is a managed, scalable file storage system that can be shared amo
 
 ### 5.1. **Create an EFS File System**
 
-```bash
+```
 aws efs create-file-system --creation-token <TOKEN> --performance-mode generalPurpose
 ```
 
@@ -257,7 +272,7 @@ aws efs create-file-system --creation-token <TOKEN> --performance-mode generalPu
 
 Once the file system is created, you need to create **mount targets** (entry points) in each availability zone so that instances in different zones can access the EFS.
 
-```bash
+```
 aws efs create-mount-target --file-system-id <EFS_ID> --subnet-id <SUBNET_ID> --security-groups <SG_ID>
 ```
 
@@ -269,11 +284,13 @@ aws efs create-mount-target --file-system-id <EFS_ID> --subnet-id <SUBNET_ID> --
 
 Amazon **RDS (Relational Database Service)** allows you to run managed relational databases like MySQL, PostgreSQL, or MariaDB.
 
+![image](https://github.com/user-attachments/assets/d81e2412-4f11-4c2d-95d1-f322e0dd82bb)
+
 ### 6.1. **Create a KMS Key for Encryption**
 
 If you want to encrypt your database for security purposes, you need to create a KMS (Key Management Service) key:
 
-```bash
+```
 aws kms create-key --description "KMS key for RDS encryption"
 ```
 
@@ -283,7 +300,7 @@ aws kms create-key --description "KMS key for RDS encryption"
 
 Since RDS instances reside in private subnets, you need to create a **DB Subnet Group** to manage which subnets the database can be placed in.
 
-```bash
+```
 aws rds create-db-subnet-group --db-subnet-group-name mydbsubnetgroup --subnet-ids <SUBNET1_ID> <SUBNET2_ID> --db-subnet-group-description "Subnet group for RDS"
 ```
 
@@ -293,7 +310,7 @@ aws rds create-db-subnet-group --db-subnet-group-name mydbsubnetgroup --subnet-i
 
 Now that you have your KMS key and subnet group, you can create the RDS instance:
 
-```bash
+```
 aws rds create-db-instance --db-instance-identifier mydbinstance --db-instance-class db.t2.micro --engine mysql --allocated-storage 20 --master-username admin --master-user-password <PASSWORD> --db-subnet-group-name mydbsubnetgroup
 ```
 
@@ -303,6 +320,7 @@ aws rds create-db-instance --db-instance-identifier mydbinstance --db-instance-c
 - `--allocated-storage 20`: Allocates 20 GB of storage for the database.
 - `--master-username admin`: Sets the administrator username for the database.
 - `--master-user-password <PASSWORD>`: Specifies the password for the administrator.
+![image](https://github.com/user-attachments/assets/0be236d8-d1f6-4570-b765-30dd7a6e752d)
 
 The RDS instance will now be created in the private subnet group with encryption.
 
@@ -316,7 +334,7 @@ EC2 instances are the virtual servers where you will host your applications and 
 
 #### Create EC2 Instances for NGINX:
 
-```bash
+```
 aws ec2 run-instances --image-id <AMI_ID> --instance-type t2.micro --key-name <KEY_PAIR> --security-group-ids <SG_ID> --subnet-id <SUBNET_ID>
 ```
 
@@ -332,19 +350,19 @@ Repeat the above for NGINX and web servers in public and private subnets, respec
 
 Once the instance is running, SSH into the NGINX instance:
 
-```bash
+```
 ssh -i <KEY_PAIR>.pem ec2-user@<INSTANCE_PUBLIC_IP>
 ```
 
 Install NGINX:
 
-```bash
+```
 sudo yum install -y nginx
 ```
 
 Start and enable NGINX:
 
-```bash
+```
 sudo systemctl start nginx
 sudo systemctl enable nginx
 ```
@@ -357,13 +375,13 @@ For WordPress and the tooling website, you'll use **Apache** as the web server w
 
 SSH into each web server and install Apache and PHP:
 
-```bash
+```
 sudo yum install -y httpd php php-mysqlnd
 ```
 
 Start and enable Apache:
 
-```bash
+```
 sudo systemctl start httpd
 sudo systemctl enable httpd
 ```
@@ -378,7 +396,7 @@ Your web servers are now ready to host applications like WordPress.
 
 An **Application Load Balancer (ALB)** distributes incoming traffic across multiple targets (such as EC2 instances). You will create an external ALB for the NGINX reverse proxy.
 
-```bash
+```
 aws elbv2 create-load-balancer --name my-ext-alb --subnets <SUBNET1_ID> <SUBNET2_ID> --security-groups <SG_ID> --scheme internet-facing
 ```
 
@@ -389,7 +407,7 @@ aws elbv2 create-load-balancer --name my-ext-alb --subnets <SUBNET1_ID> <SUBNET2
 
 #### Attach the ACM Certificate to the ALB:
 
-```bash
+```
 aws elbv2 create-listener --load-balancer-arn <ALB_ARN> --protocol HTTPS --port 443 --certificates CertificateArn=<ACM_CERTIFICATE_ARN>
 ```
 
@@ -399,7 +417,7 @@ aws elbv2 create-listener --load-balancer-arn <ALB_ARN> --protocol HTTPS --port 
 
 Next, create an internal ALB that will route traffic to your web servers:
 
-```bash
+```
 aws elbv2 create-load-balancer --name my-int-alb --subnets <PRIVATE_SUBNET1_ID> <PRIVATE_SUBNET2_ID> --security-groups <SG_ID> --scheme internal
 ```
 
@@ -415,7 +433,7 @@ aws elbv2 create-load-balancer --name my-int-alb --subnets <PRIVATE_SUBNET1_ID> 
 
 A **Launch Template** defines the configuration for instances in an autoscaling group (instance type, AMI, key pair, etc.).
 
-```bash
+```
 aws ec2 create-launch-template --launch-template-name web-launch-template --version-description "WebServerTemplate" --launch-template-data "{\"ImageId\":\"<AMI_ID>\", \"InstanceType\":\"t2.micro\"}"
 ```
 
@@ -430,7 +448,7 @@ Repeat this for NGINX instances.
 
 Create autoscaling groups that will automatically scale the number of NGINX and web server instances based on traffic.
 
-```bash
+```
 aws autoscaling create-auto-scaling-group --auto-scaling-group-name nginx-asg --launch-template LaunchTemplateName=nginx-launch-template --min-size 1 --max-size 3 --desired-capacity 1 --vpc-zone-identifier <SUBNETS>
 ```
 
@@ -450,13 +468,13 @@ The NGINX server will act as a **reverse proxy**, forwarding traffic to the inte
 
 SSH into your NGINX instance and edit the NGINX configuration file:
 
-```bash
+```
 sudo vi /etc/nginx/nginx.conf
 ```
 
 Add the reverse proxy configuration to forward requests to the internal ALB:
 
-```nginx
+```
 server {
     listen 80;
     server_name yourdomain.com;
