@@ -541,6 +541,9 @@ Follow a similar process to install your tooling application on the other web se
 ## **12. Monitoring and Maintenance**
 
 Use **CloudWatch** and **AWS Auto Scaling** to monitor traffic and scale your application as needed. You can set alarms in CloudWatch to trigger autoscaling events when CPU utilization or network traffic exceeds predefined thresholds.
+![image](https://github.com/user-attachments/assets/30f30add-94ec-4eed-a294-efa657ad2427)
+
+![image](https://github.com/user-attachments/assets/dcb33a9c-5a76-4af4-a818-28b4be8b54ec)
 
 ---
 
